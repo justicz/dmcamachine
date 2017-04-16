@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
 import transmissionrpc as tm
-from os.path import getmtime, isfile, join
-from os import listdir
 from urllib import quote
+import os
 
 application = Flask(__name__)
 
@@ -37,16 +36,19 @@ def get_torrents():
 	out.sort(key = lambda x: -x["tid"])
 
 	files = []
-	for f in listdir(COMPLETED_TORRENT_DIR):
-		fullpath = join(COMPLETED_TORRENT_DIR, f)
-		if isfile(fullpath):
-			files.append((fullpath, f))
-	files.sort(key = lambda x: -getmtime(x[0]))
+	for f in os.listdir(COMPLETED_TORRENT_DIR):
+		fullpath = os.path.join(COMPLETED_TORRENT_DIR, f)
+		# Hack, but nginx's try_files is redirecting to port 80 :/
+		if os.path.isdir(fullpath):
+			f += os.path.sep
+		files.append((fullpath, f))
+
+	files.sort(key = lambda x: -os.path.getmtime(x[0]))
 
 	for f in files:
 		out.append({	"name": f[1],
 						"progress": 100,
-						"link": PUBLIC_DIR + quote(f[1]),
+						"link": os.path.join(PUBLIC_DIR, f[1]),
 						"status": "done"
 					})
 
