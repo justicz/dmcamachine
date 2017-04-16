@@ -1,0 +1,204 @@
+<html>
+	<head>
+		<title>DMCA Machine</title>
+		<link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet">
+		<style>
+			body {
+				background-color: #0E1417;
+				color: #D4E2EB;
+				font-family: 'Source Code Pro', monospace;
+				text-align: center;
+			}
+			.bluetext {
+				color: #60A6C8
+			}
+			#wrap {
+				padding-top: 30px;
+				width: 700px;
+				margin: 0 auto;
+			}
+			#add {
+				margin: 30px;
+				height: 50px;
+				background-color: #D8E4ED;
+			}
+			#torrents-wrap {
+				margin: 25px;
+				height: 500px;
+				overflow-y: scroll;
+			}
+			.info {
+				text-align: left;
+				position: relative;
+				background-color: #60A6C8;
+				height: 30px;
+				margin: 5px;
+			}
+			.torrent {
+				position: relative;
+				background-color: #D8E4ED;
+				height: 60px;
+				margin: 5px;
+			}
+			.loading {
+				height: 15px;
+				width: 60%;
+				background-color: #C488E9;
+				position: absolute;
+				bottom: 0;
+			}
+			#url {
+				width: 95%;
+				height: 100%;
+				font-size: 15px;
+				background-color: #D8E4ED;
+				border: none;
+			}
+			input:focus {
+				outline-width: 0;
+			}
+			marquee {
+				font-size: 30px;
+			}
+			.name-wrap {
+				width: 90%;
+				text-align: left;
+				overflow: hidden;
+			}
+			.name {
+				color: #0E1417;
+				padding: 9px 5px 0 10px;
+				white-space: nowrap;
+			}
+			.name-link {
+				color: #0E1417;
+			}
+			.done {
+				background-color: #94BA64;
+			}
+			.delete-button {
+				position: absolute;
+				right: 10px;
+				text-decoration: none;
+				bottom: 20px;
+				color: #0E1417;
+				font-size: 20px;
+			}
+			p {
+				padding: 1px 5px 0 5px;
+				margin: 0;
+				font-size: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="wrap">
+			<h1>Tetazoo DMCA Machine</h1>
+			<marquee class="bluetext">Stealing Is Wrong</marquee>
+
+			<div id="add">
+				<form method="POST" action="/add" onsubmit="return add_torrent(this)">
+					<input placeholder="Torrent link" id="url" type="text" name="url">
+				</form>
+			</div>
+
+			<h2>Torrents</h2>
+			<div id="torrents-wrap">
+			</div>
+		</div>
+		<script>
+			function add_torrent(f) {
+				var inp = document.getElementById("url");
+				var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == XMLHttpRequest.DONE) {
+						inp.disabled = false;
+                        var resp = JSON.parse(xhr.responseText);
+						if (resp.success) {
+							inp.value = "";
+						} else {
+							alert(resp.message);
+						}
+                    }
+                }
+				xhr.open('POST', '/add', true);
+				xhr.send(new FormData(f));
+				inp.disabled = true;
+				return false;
+			}
+
+			function kill_torrent(tid) {
+				var inp = document.getElementById("url");
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', '/kill', true);
+				var data = new FormData();
+				data.append('tid', tid);
+				xhr.send(data);
+			}
+
+			function make_torrent_entry(t) {
+				// Outer div
+				var div = document.createElement('div');
+				div.className = "torrent";
+
+				// Name
+				var namewrap = document.createElement('div');
+				namewrap.className = "name-wrap";
+				var name = document.createElement('p');
+				name.className = "name";
+				var namelink = document.createElement('a');
+				if (t.link != undefined) {
+					namelink.href = t.link;
+				}
+				name.appendChild(namelink);
+				namelink.innerText = t.name;
+				namelink.className = "name-link";
+				namewrap.appendChild(name);
+
+				var load = document.createElement('div');
+				load.className = "loading " + t.status;
+				if (t.progress < 1.0) {
+					t.progress = 1.0;
+				}
+				if (t.status != "done") {
+					var del = document.createElement('a');
+					del.className = "delete-button";
+					del.innerText = "[X]";
+					del.href = "#";
+					del.onclick = function() { kill_torrent(t.tid) }
+					div.appendChild(del);
+				}
+				load.setAttribute("style", "width: " + t.progress + "%");
+				div.appendChild(namewrap);
+				div.appendChild(load);
+				return div;
+			}
+
+			function update_torrent_list(data) {
+				var torrents = JSON.parse(data);
+				var list = document.getElementById("torrents-wrap");
+				list.innerHTML = "";
+				for (var i = 0; i < torrents.length; i++) {
+					var t = torrents[i];
+					var e = make_torrent_entry(t);
+					list.appendChild(e);
+				}
+			}
+
+			function fetch_state() {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState == XMLHttpRequest.DONE) {
+						update_torrent_list(xhr.responseText);
+					}
+				}
+				xhr.open('GET', '/status', true);
+				xhr.send(null);
+			}
+
+			fetch_state();
+			setInterval(fetch_state, 1000);
+		</script>
+	</body>
+</html>
+
