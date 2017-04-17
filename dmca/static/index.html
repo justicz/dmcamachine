@@ -34,6 +34,12 @@
 				height: 30px;
 				margin: 5px;
 			}
+			.seeall {
+				position: relative;
+				background-color: #D8E4ED;
+				height: 50px;
+				margin: 5px;
+			}
 			.torrent {
 				position: relative;
 				background-color: #D8E4ED;
@@ -155,6 +161,7 @@
 				namelink.className = "name-link";
 				namewrap.appendChild(name);
 
+				// Loading bar
 				var load = document.createElement('div');
 				load.className = "loading " + t.status;
 				if (t.progress < 1.0) {
@@ -174,6 +181,20 @@
 				return div;
 			}
 
+			function make_seeall_entry() {
+				var div = document.createElement('div');
+				div.className = "seeall";
+				var name = document.createElement('p');
+				name.className = "name";
+				var namelink = document.createElement('a');
+				namelink.href = "/torrents/";
+				name.appendChild(namelink);
+				namelink.innerText = "See all";
+				namelink.className = "name-link";
+				div.appendChild(name);
+				return div;
+			}
+
 			function update_torrent_list(data) {
 				var torrents = JSON.parse(data);
 				var list = document.getElementById("torrents-wrap");
@@ -183,6 +204,7 @@
 					var e = make_torrent_entry(t);
 					list.appendChild(e);
 				}
+				list.appendChild(make_seeall_entry());
 			}
 
 			function fetch_state() {

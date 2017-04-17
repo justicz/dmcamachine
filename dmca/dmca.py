@@ -45,6 +45,8 @@ def get_torrents():
 
 	files.sort(key = lambda x: -os.path.getmtime(x[0]))
 
+	files = files[:10]
+
 	for f in files:
 		out.append({	"name": f[1],
 						"progress": 100,
