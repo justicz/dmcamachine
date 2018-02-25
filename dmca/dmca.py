@@ -6,7 +6,7 @@ import os
 application = Flask(__name__)
 
 COMPLETED_TORRENT_DIR = "/dmca/static/torrents/"
-PUBLIC_DIR = "/torrents/"
+PUBLIC_DIR = "torrents/"
 
 tc = tm.Client('localhost', port=9091)
 
