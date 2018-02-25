@@ -5,6 +5,7 @@ from urllib.parse import urlparse, quote
 from html.parser import HTMLParser
 from binascii import hexlify
 import multiprocessing as mp
+from pathlib import Path
 import requests
 import shutil
 import os
@@ -35,6 +36,9 @@ def download_file(url):
   r = requests.get(url, stream=True)
   disposition_header = r.headers.get("content-disposition", "")
   filename = re.findall("filename=(.+)", disposition_header)[0]
+  if filename.startswith('"') and filename.endswith('"'):
+    filename = filename[1:-1]
+  extensions = ''.join(Path(filename).suffixes)
   filename = os.path.basename(filename) + "_" + hexlify(os.urandom(32)).decode("utf8")
   filename = filename + "_" + str(int(r.headers.get('content-length', '0')))
   full_filename = os.path.join(INCOMPLETE_HTTP_DIR, filename)
@@ -46,7 +50,8 @@ def download_file(url):
   except Exception:
     os.unlink(full_filename)
   r.close()
-  shutil.move(full_filename, os.path.join(COMPLETED_TORRENT_DIR, filename))
+  outfile = os.path.join(COMPLETED_TORRENT_DIR, filename + extensions)
+  shutil.move(full_filename, outfile)
 
 def try_download_book(url):
   r = requests.get(url)
