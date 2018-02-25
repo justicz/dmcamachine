@@ -2,9 +2,9 @@ FROM nginx
 
 LABEL maintainer "maxj@mit.edu"
 
-RUN apt-get update && apt-get install -y python2.7-dev python-pip transmission-daemon
+RUN apt-get update && apt-get install -y python3-dev python3-pip transmission-daemon
 
-RUN pip install uwsgi flask transmissionrpc requests beautifulsoup4
+RUN pip3 install uwsgi flask transmissionrpc requests beautifulsoup4
 
 ADD dmca /dmca
 

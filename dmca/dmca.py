@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 import transmissionrpc as tm
 from bs4 import BeautifulSoup
-from urlparse import urlparse
-from urllib import quote
-from HTMLParser import HTMLParser
+from urllib.parse import urlparse, quote
+from html.parser import HTMLParser
+from binascii import hexlify
 import multiprocessing as mp
 import requests
 import shutil
@@ -35,7 +35,7 @@ def download_file(url):
   r = requests.get(url, stream=True)
   disposition_header = r.headers.get("content-disposition", "")
   filename = re.findall("filename=(.+)", disposition_header)[0]
-  filename = os.path.basename(filename) + "_" + os.urandom(32).encode("hex")
+  filename = os.path.basename(filename) + "_" + hexlify(os.urandom(32)).decode("utf8")
   filename = filename + "_" + str(int(r.headers.get('content-length', '0')))
   full_filename = os.path.join(INCOMPLETE_HTTP_DIR, filename)
   try:
@@ -62,7 +62,9 @@ def try_download_book(url):
 def try_download_book_async(url):
   parsed = urlparse(url)
   if parsed.netloc == LIBGEN_HOST and parsed.scheme in ["http", "https"]:
-    p = mp.Process(target=try_download_book, args=(url,))
+    mp.set_executable("/usr/bin/python3")
+    ctx = mp.get_context("spawn")
+    p = ctx.Process(target=try_download_book, args=(url,))
     p.start()
     return True
   return False
