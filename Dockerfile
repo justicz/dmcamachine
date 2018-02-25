@@ -4,7 +4,7 @@ LABEL maintainer "maxj@mit.edu"
 
 RUN apt-get update && apt-get install -y python2.7-dev python-pip transmission-daemon
 
-RUN pip install uwsgi flask transmissionrpc
+RUN pip install uwsgi flask transmissionrpc requests beautifulsoup4
 
 ADD dmca /dmca
 
