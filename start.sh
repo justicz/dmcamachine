@@ -1,5 +1,13 @@
+#!/bin/bash
+
+set -f
+set -e
+set -u
+set -o pipefail
+set -x
+
 # If we're already running, stop
-docker kill dmcarunning
+docker kill dmcarunning || true
 
 # Build the image
 docker build -t dmcamachine .
