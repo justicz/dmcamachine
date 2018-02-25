@@ -13,14 +13,14 @@ docker kill dmcarunning || true
 docker build -t dmcamachine .
 
 # What port should I run on?
-PRT=4040
+PRT=51086
 
 # What is my ip?
 HSTIP=127.0.0.1
 
 # Change these to the appropriate directories for persistent storage
-TMP_DOWNLOAD_DIR=/tmp/tmptorrents/
-DOWNLOAD_DIR=/tmp/torrents/
+TMP_DOWNLOAD_DIR=/srv/http/dmcamachine/tmptorrents
+DOWNLOAD_DIR=/srv/http/dmcamachine/torrents
 
 # Make sure they exist on the host
 mkdir -p $TMP_DOWNLOAD_DIR $DOWNLOAD_DIR
