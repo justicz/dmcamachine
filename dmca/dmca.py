@@ -15,7 +15,7 @@ application = Flask(__name__)
 COMPLETED_TORRENT_DIR = "/dmca/static/torrents/"
 INCOMPLETE_TORRENT_DIR = "/dmca/static/tmp/"
 INCOMPLETE_HTTP_DIR = "/dmca/static/http/tmp/"
-PUBLIC_DIR = "/torrents/"
+PUBLIC_DIR = "torrents/"
 LIBGEN_HOST = "libgen.io"
 
 tc = tm.Client('localhost', port=9091)

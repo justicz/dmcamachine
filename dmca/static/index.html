@@ -103,7 +103,7 @@
 			<marquee class="bluetext">Stealing Is Wrong</marquee>
 
 			<div id="add">
-				<form method="POST" action="/add" onsubmit="return add_torrent(this)">
+				<form method="POST" action="add" onsubmit="return add_torrent(this)">
 					<input placeholder="Torrent link" id="url" type="text" name="url">
 				</form>
 			</div>
@@ -127,7 +127,7 @@
 						}
                     }
                 }
-				xhr.open('POST', '/add', true);
+				xhr.open('POST', 'add', true);
 				xhr.send(new FormData(f));
 				inp.disabled = true;
 				return false;
@@ -136,7 +136,7 @@
 			function kill_torrent(tid) {
 				var inp = document.getElementById("url");
 				var xhr = new XMLHttpRequest();
-				xhr.open('POST', '/kill', true);
+				xhr.open('POST', 'kill', true);
 				var data = new FormData();
 				data.append('tid', tid);
 				xhr.send(data);
@@ -187,7 +187,7 @@
 				var name = document.createElement('p');
 				name.className = "name";
 				var namelink = document.createElement('a');
-				namelink.href = "/torrents/";
+				namelink.href = "torrents/";
 				name.appendChild(namelink);
 				namelink.innerText = "See all";
 				namelink.className = "name-link";
@@ -214,7 +214,7 @@
 						update_torrent_list(xhr.responseText);
 					}
 				}
-				xhr.open('GET', '/status', true);
+				xhr.open('GET', 'status', true);
 				xhr.send(null);
 			}
 
