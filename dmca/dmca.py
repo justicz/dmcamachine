@@ -14,8 +14,8 @@ import re
 application = Flask(__name__)
 
 COMPLETED_TORRENT_DIR = "/dmca/static/torrents/"
-INCOMPLETE_TORRENT_DIR = "/dmca/static/tmp/"
-INCOMPLETE_HTTP_DIR = "/dmca/static/http/tmp/"
+INCOMPLETE_TORRENT_DIR = "/dmca/static/torrents_tmp/"
+INCOMPLETE_HTTP_DIR = "/dmca/static/http_tmp/"
 PUBLIC_DIR = "torrents/"
 LIBGEN_HOST = "libgen.io"
 
