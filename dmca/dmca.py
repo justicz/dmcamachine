@@ -32,50 +32,8 @@ def remove_stopped_torrents(raw):
     if t.status == "stopped":
       tc.remove_torrent(t.id)
 
-def download_file(url):
-  r = requests.get(url, stream=True)
-  disposition_header = r.headers.get("content-disposition", "")
-  filename = re.findall("filename=(.+)", disposition_header)[0]
-  if filename.startswith('"') and filename.endswith('"'):
-    filename = filename[1:-1]
-  extensions = ''.join(Path(filename).suffixes)
-  filename = os.path.basename(filename) + "_" + hexlify(os.urandom(32)).decode("utf8")
-  filename = filename + "_" + str(int(r.headers.get('content-length', '0')))
-  full_filename = os.path.join(INCOMPLETE_HTTP_DIR, filename)
-  try:
-    with open(full_filename, 'wb') as fout:
-      for chunk in r.iter_content(chunk_size=2048):
-        if chunk:
-          fout.write(chunk)
-  except Exception:
-    os.unlink(full_filename)
-  r.close()
-  outfile = os.path.join(COMPLETED_TORRENT_DIR, filename + extensions)
-  shutil.move(full_filename, outfile)
-
-def try_download_book(url):
-  r = requests.get(url)
-  soup = BeautifulSoup(r.text, "html.parser")
-  links = soup.find_all('a')
-  for link in links:
-    href = link.attrs.get("href", "")
-    if "key=" in href:
-      h = HTMLParser()
-      href = h.unescape(href)
-      download_file(href)
-
-def try_download_book_async(url):
-  parsed = urlparse(url)
-  if parsed.netloc == LIBGEN_HOST and parsed.scheme in ["http", "https"]:
-    mp.set_executable("/usr/bin/python3")
-    ctx = mp.get_context("spawn")
-    p = ctx.Process(target=try_download_book, args=(url,))
-    p.start()
-    return True
-  return False
-
-def get_torrents():
-  # Actual torrents
+def get_file_list():
+  # Active torrents
   raw = tc.get_torrents()
   remove_stopped_torrents(raw)
   out = []
@@ -128,6 +86,48 @@ def get_torrents():
 
   return out
 
+def download_file(url):
+  r = requests.get(url, stream=True)
+  disposition_header = r.headers.get("content-disposition", "")
+  filename = re.findall("filename=(.+)", disposition_header)[0]
+  if filename.startswith('"') and filename.endswith('"'):
+    filename = filename[1:-1]
+  extensions = ''.join(Path(filename).suffixes)
+  filename = os.path.basename(filename) + "_" + hexlify(os.urandom(32)).decode("utf8")
+  filename = filename + "_" + str(int(r.headers.get('content-length', '0')))
+  full_filename = os.path.join(INCOMPLETE_HTTP_DIR, filename)
+  try:
+    with open(full_filename, 'wb') as fout:
+      for chunk in r.iter_content(chunk_size=2048):
+        if chunk:
+          fout.write(chunk)
+  except Exception:
+    os.unlink(full_filename)
+  r.close()
+  outfile = os.path.join(COMPLETED_TORRENT_DIR, filename + extensions)
+  shutil.move(full_filename, outfile)
+
+def try_download_book(url):
+  r = requests.get(url)
+  soup = BeautifulSoup(r.text, "html.parser")
+  links = soup.find_all('a')
+  for link in links:
+    href = link.attrs.get("href", "")
+    if "key=" in href:
+      h = HTMLParser()
+      href = h.unescape(href)
+      download_file(href)
+
+def try_download_book_async(url):
+  parsed = urlparse(url)
+  if parsed.netloc == LIBGEN_HOST and parsed.scheme in ["http", "https"]:
+    mp.set_executable("/usr/bin/python3")
+    ctx = mp.get_context("spawn")
+    p = ctx.Process(target=try_download_book, args=(url,))
+    p.start()
+    return True
+  return False
+
 # We only get here when running the debug application server
 @application.route("/", methods=['GET'])
 def index():
@@ -140,7 +140,7 @@ def add_torrent():
   try:
     tc.add_torrent(request.form['url'])
   except Exception:
-    return error("Error adding torrent. Is it a valid, or have you already added it?")
+    return error("Error adding torrent")
 
   return success()
 
@@ -157,7 +157,7 @@ def kill_torrent():
 
 @application.route("/status", methods=['GET'])
 def get_status():
-  return jsonify(get_torrents())
+  return jsonify(get_file_list())
 
 if __name__ == "__main__":
   application.run(host='localhost')

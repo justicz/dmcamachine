@@ -19,12 +19,13 @@ PRT=51086
 HSTIP=127.0.0.1
 
 # Change these to the appropriate directories for persistent storage
-TMP_DOWNLOAD_DIR=/srv/http/dmcamachine/tmptorrents
+TMP_TORRENT_DOWNLOAD_DIR=/srv/http/dmcamachine/tmptorrents
+TMP_HTTP_DOWNLOAD_DIR=/srv/http/dmcamachine/tmphttp
 DOWNLOAD_DIR=/srv/http/dmcamachine/torrents
 
 # Make sure they exist on the host
-mkdir -p $TMP_DOWNLOAD_DIR $DOWNLOAD_DIR
+mkdir -p $TMP_TORRENT_DOWNLOAD_DIR $TMP_HTTP_DOWNLOAD_DIR $DOWNLOAD_DIR
 
 # Run the container
-docker run -d -v $TMP_DOWNLOAD_DIR:/dmca/static/tmp -v $DOWNLOAD_DIR:/dmca/static/torrents -p $HSTIP:$PRT:80 -it --rm --name dmcarunning dmcamachine
+docker run -d -v $TMP_TORRENT_DOWNLOAD_DIR:/dmca/static/torrents_tmp -v $TMP_HTTP_DOWNLOAD_DIR:/dmca/static/http_tmp -v $DOWNLOAD_DIR:/dmca/static/torrents -p $HSTIP:$PRT:80 -it --rm --name dmcarunning dmcamachine
 
