@@ -79,11 +79,17 @@ def get_file_list():
   files = files[:10]
 
   for f in files:
-    out.append({  "name": f[1],
-            "progress": 100,
-            "link": os.path.join(PUBLIC_DIR, f[1]),
-            "status": "done"
-          })
+    entry = {
+      "name": f[1],
+      "progress": 100,
+      "link": os.path.join(PUBLIC_DIR, f[1]),
+      "status": "done"
+    }
+    try:
+      entry["tid"] = [int(t.id) for t in raw if t.name == entry["name"]][0]
+    except IndexError:
+      pass
+    out.append(entry)
 
   return out
 
