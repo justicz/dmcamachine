@@ -24,8 +24,9 @@ tc = tm.Client('localhost', port=9091)
 def error(msg):
   return jsonify({"success": False, "message": msg})
 
-def success():
-  return jsonify({"success": True})
+def success(**fields):
+  fields["success"] = True
+  return jsonify(fields)
 
 def remove_stopped_torrents(raw):
   for t in raw:
@@ -138,7 +139,8 @@ def add_torrent():
   if try_download_book_async(request.form['url']):
     return success()
   try:
-    tc.add_torrent(request.form['url'])
+    t = tc.add_torrent(request.form['url'])
+    return success(tid=t.id)
   except Exception:
     return error("Error adding torrent")
 
