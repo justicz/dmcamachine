@@ -144,8 +144,6 @@ def add_torrent():
   except Exception:
     return error("Error adding torrent")
 
-  return success()
-
 @application.route("/kill", methods=['POST'])
 def kill_torrent():
   tid = request.form['tid']
