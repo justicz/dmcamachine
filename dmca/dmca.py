@@ -24,8 +24,9 @@ tc = tm.Client('localhost', port=9091)
 def error(msg):
   return jsonify({"success": False, "message": msg})
 
-def success():
-  return jsonify({"success": True})
+def success(**fields):
+  fields["success"] = True
+  return jsonify(fields)
 
 def remove_stopped_torrents(raw):
   for t in raw:
@@ -78,11 +79,17 @@ def get_file_list():
   files = files[:10]
 
   for f in files:
-    out.append({  "name": f[1],
-            "progress": 100,
-            "link": os.path.join(PUBLIC_DIR, f[1]),
-            "status": "done"
-          })
+    entry = {
+      "name": f[1],
+      "progress": 100,
+      "link": os.path.join(PUBLIC_DIR, f[1]),
+      "status": "done"
+    }
+    try:
+      entry["tid"] = [int(t.id) for t in raw if t.name == entry["name"]][0]
+    except IndexError:
+      pass
+    out.append(entry)
 
   return out
 
@@ -138,11 +145,10 @@ def add_torrent():
   if try_download_book_async(request.form['url']):
     return success()
   try:
-    tc.add_torrent(request.form['url'])
+    t = tc.add_torrent(request.form['url'])
+    return success(tid=t.id)
   except Exception:
     return error("Error adding torrent")
-
-  return success()
 
 @application.route("/kill", methods=['POST'])
 def kill_torrent():
